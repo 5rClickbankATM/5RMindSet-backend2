@@ -56,4 +56,3 @@ if (process.env.ENABLE_BOTS !== 'false') {
 }
 
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
-
