@@ -27,6 +27,11 @@ app.get('/test-shopify-api', async (req, res) => {
   try {
     const shop = process.env.SHOPIFY_STORE_URL;
     const token = process.env.SHOPIFY_ADMIN_TOKEN;
+
+    if (!shop || !token) {
+      return res.status(400).json({ success: false, error: 'Missing SHOPIFY_STORE_URL or SHOPIFY_ADMIN_TOKEN in environment variables.' });
+    }
+
     const response = await axios.get(`https://${shop}/admin/api/2023-10/products.json`, {
       headers: {
         'X-Shopify-Access-Token': token
@@ -40,10 +45,14 @@ app.get('/test-shopify-api', async (req, res) => {
 });
 
 if (process.env.ENABLE_BOTS !== 'false') {
-  rebel.schedule();
-  nova.schedule();
-  echo.schedule();
-  atlas.schedule();
+  try {
+    rebel.schedule();
+    nova.schedule();
+    echo.schedule();
+    atlas.schedule();
+  } catch (botError) {
+    console.error('Error scheduling bots:', botError.message);
+  }
 }
 
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
