@@ -4,10 +4,10 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const shopifyRouter = require('./routes/shopify');
-const rebel = require('./bots/rebel');
-const nova = require('./bots/nova');
-const echo = require('./bots/echo');
-const atlas = require('./bots/atlas');
+const rebel = require('./routes/bots/rebel');
+const nova = require('./routes/bots/nova');
+const echo = require('./routes/bots/echo');
+const atlas = require('./routes/bots/atlas');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
