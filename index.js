@@ -1,9 +1,10 @@
 // New index.js
+require('dotenv').config();
+
 console.log("ENV VARS CHECK");
 console.log("SHOPIFY_STORE_URL =", process.env.SHOPIFY_STORE_URL);
 console.log("SHOPIFY_ADMIN_TOKEN is set =", !!process.env.SHOPIFY_ADMIN_TOKEN);
 
-require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const axios = require('axios');
