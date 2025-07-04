@@ -20,14 +20,11 @@ app.use(session({
 }));
 
 app.get('/test-shopify-api', async (req, res) => {
-  const storeUrl = process.env.SHOPIFY_STORE_URL || "undefined-in-env";
+  const storeUrl = "nyrepd-gh.myshopify.com"; // Hardcoded for test
   const adminToken = process.env.SHOPIFY_ADMIN_TOKEN;
 
   console.log("Calling Shopify API with storeUrl =", storeUrl);
-
-  if (storeUrl === "undefined-in-env") {
-    return res.status(500).json({ success: false, error: "SHOPIFY_STORE_URL is undefined at runtime" });
-  }
+  console.log("Available ENV Vars:", process.env);
 
   try {
     const response = await axios.get(`https://${storeUrl}/admin/api/2023-07/shop.json`, {
