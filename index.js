@@ -1,14 +1,14 @@
 const express = require('express');
 const session = require('express-session');
 const dotenv = require('dotenv');
+const axios = require('axios');
 dotenv.config();
 
-// Route and bot imports
 const shopifyRouter = require('./routes/shopify');
-const atlas = require('./routes/bots/atlas');
-const echo = require('./routes/bots/echo');
-const nova = require('./routes/bots/nova');
 const rebel = require('./routes/bots/rebel');
+const nova = require('./routes/bots/nova');
+const echo = require('./routes/bots/echo');
+const atlas = require('./routes/bots/atlas');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,21 +17,33 @@ app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET || '5r-secret',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: true
 }));
 
-// Register routes
 app.use('/shopify', shopifyRouter);
-
-// Default health check
 app.get('/', (req, res) => res.send('5Rmindset Shopify Bot Backend Running'));
 
-// Activate bots if enabled
+app.get('/test-shopify-api', async (req, res) => {
+  try {
+    const shop = process.env.SHOPIFY_STORE_URL;
+    const token = process.env.SHOPIFY_ADMIN_TOKEN;
+    const response = await axios.get(`https://${shop}/admin/api/2023-10/products.json`, {
+      headers: {
+        'X-Shopify-Access-Token': token
+      }
+    });
+    res.json({ success: true, data: response.data });
+  } catch (err) {
+    console.error('Shopify API Test Error:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 if (process.env.ENABLE_BOTS !== 'false') {
-  atlas.schedule();
-  echo.schedule();
-  nova.schedule();
   rebel.schedule();
+  nova.schedule();
+  echo.schedule();
+  atlas.schedule();
 }
 
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
