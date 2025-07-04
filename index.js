@@ -1,78 +1,33 @@
+// New index.js
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
-const dotenv = require('dotenv');
 const axios = require('axios');
-dotenv.config();
-
-const shopifyRouter = require('./routes/shopify');
-const rebel = require('./routes/bots/rebel');
-const nova = require('./routes/bots/nova');
-const echo = require('./routes/bots/echo');
-const atlas = require('./routes/bots/atlas');
-
 const app = express();
+
 const PORT = process.env.PORT || 3000;
+const SHOPIFY_STORE_URL = process.env.SHOPIFY_STORE_URL;
+const SHOPIFY_ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
 
 app.use(express.json());
-
 app.use(session({
-  secret: process.env.SESSION_SECRET || '5r-secret',
+  secret: process.env.SESSION_SECRET || 'defaultsecret',
   resave: false,
   saveUninitialized: true
 }));
 
-app.use('/shopify', shopifyRouter);
-
-app.get('/', (req, res) => {
-  res.send('5Rmindset Shopify Bot Backend Running');
-});
-
 app.get('/test-shopify-api', async (req, res) => {
   try {
-    let shop = process.env.SHOPIFY_STORE_URL;
-    const token = process.env.SHOPIFY_ADMIN_TOKEN;
-
-    if (!shop || !token) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing SHOPIFY_STORE_URL or SHOPIFY_ADMIN_TOKEN in environment variables.'
-      });
-    }
-
-    if (shop.startsWith('https://')) {
-      shop = shop.replace('https://', '');
-    }
-
-    const url = `https://${shop}/admin/api/2023-10/products.json`;
-
-    const response = await axios.get(url, {
+    const response = await axios.get(`https://${SHOPIFY_STORE_URL}/admin/api/2023-07/shop.json`, {
       headers: {
-        'X-Shopify-Access-Token': token
+        'X-Shopify-Access-Token': SHOPIFY_ADMIN_TOKEN,
+        'Content-Type': 'application/json'
       }
     });
-
-    res.json({ success: true, data: response.data });
-  } catch (err) {
-    console.error('Shopify API Test Error:', err.response?.data || err.message);
-    res.status(500).json({
-      success: false,
-      error: err.message,
-      details: err.response?.data || null
-    });
+    res.json({ success: true, shop: response.data });
+  } catch (error) {
+    res.status(401).json({ success: false, error: error.message, details: error.response?.data });
   }
 });
 
-if (process.env.ENABLE_BOTS !== 'false') {
-  try {
-    rebel.schedule();
-    nova.schedule();
-    echo.schedule();
-    atlas.schedule();
-  } catch (botError) {
-    console.error('Error scheduling bots:', botError.message);
-  }
-}
-
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
