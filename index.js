@@ -10,8 +10,6 @@ const axios = require('axios');
 const app = express();
 
 const PORT = process.env.PORT || 3000;
-const SHOPIFY_STORE_URL = process.env.SHOPIFY_STORE_URL;
-const SHOPIFY_ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
 
 app.use(express.json());
 app.use(session({
@@ -21,10 +19,15 @@ app.use(session({
 }));
 
 app.get('/test-shopify-api', async (req, res) => {
+  const storeUrl = process.env.SHOPIFY_STORE_URL;
+  const adminToken = process.env.SHOPIFY_ADMIN_TOKEN;
+
+  console.log("Calling Shopify API with storeUrl =", storeUrl);
+
   try {
-    const response = await axios.get(`https://${SHOPIFY_STORE_URL}/admin/api/2023-07/shop.json`, {
+    const response = await axios.get(`https://${storeUrl}/admin/api/2023-07/shop.json`, {
       headers: {
-        'X-Shopify-Access-Token': SHOPIFY_ADMIN_TOKEN,
+        'X-Shopify-Access-Token': adminToken,
         'Content-Type': 'application/json'
       }
     });
